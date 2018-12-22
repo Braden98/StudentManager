@@ -36,14 +36,15 @@ public class StudentDaoImpl implements StudentDao {
 
 	@Override
 	public void add(Student student) {
-		String sql = "INSERT INTO student VALUES(NULL,?,?,?,?,?)";
+		String sql = "INSERT INTO student VALUES(NULL,?,?,?,?,?,?)";
 		try (Connection c = DBUtil.getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
 
 			ps.setInt(1, student.getStudentID());
 			ps.setString(2, student.getName());
 			ps.setInt(3, student.getAge());
 			ps.setString(4, student.getSex());
-			ps.setDate(5, new java.sql.Date(student.getBirthday().getTime()));
+			ps.setInt(5,student.getAssID());
+			ps.setDate(6, new java.sql.Date(student.getBirthday().getTime()));
 
 			ps.execute();
 		} catch (SQLException e) {
@@ -55,7 +56,7 @@ public class StudentDaoImpl implements StudentDao {
 	@Override
 	public void delete(int id) {
 
-		String sql = "DELETE FROM student WHERE ID = ?";
+		String sql = "DELETE FROM student WHERE stu_ID = ?";
 		try (Connection c = DBUtil.getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
 
 			ps.setInt(1, id);
@@ -69,16 +70,17 @@ public class StudentDaoImpl implements StudentDao {
 
 	@Override
 	public void update(Student student) {
-
-		String sql = "update student set studentid = ?, name = ?, age = ?, sex = ?, birthday = ? where id = ? ";
+		//根据stu_id处理要删除的对象
+		String sql = "update student set stu_ID = ?, stu_name = ?, age = ?, sex = ?, ass_ID=?,date = ? where stu_ID = ? ";
 		try (Connection c = DBUtil.getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
 
 			ps.setInt(1, student.getStudentID());
 			ps.setString(2, student.getName());
 			ps.setInt(3, student.getAge());
 			ps.setString(4, student.getSex());
-			ps.setDate(5, new java.sql.Date(student.getBirthday().getTime()));
-			ps.setInt(6, student.getId());
+			ps.setInt(5,student.getAssID());
+			ps.setDate(6, new java.sql.Date(student.getBirthday().getTime()));
+			ps.setInt(7, student.getStudentID());
 
 			ps.execute();
 
@@ -91,22 +93,24 @@ public class StudentDaoImpl implements StudentDao {
 	public Student get(int id) {
 		Student student = new Student();
 
-		String sql = "SELECT * FROM student WHERE ID = " + id;
+		String sql = "SELECT * FROM student WHERE stu_ID = " + id;
 		try (Connection c = DBUtil.getConnection(); Statement st = c.createStatement()) {
 
 			ResultSet rs = st.executeQuery(sql);
 
 			if (rs.next()) {
 
-				int student_id = rs.getInt("studentid");
+				int student_id = rs.getInt("stu_ID");
 				String name = rs.getString("name");
 				int age = rs.getInt("age");
 				String sex = rs.getString("sex");
-				Date birthday = rs.getDate("birthday");
+				int ass_id=rs.getInt("ass_ID");
+				Date birthday = rs.getDate("date");
 				student.setStudentID(student_id);
 				student.setName(name);
 				student.setAge(age);
 				student.setSex(sex);
+				student.setAssID(ass_id);
 				student.setBirthday(birthday);
 				student.setId(id);
 			}
@@ -127,7 +131,7 @@ public class StudentDaoImpl implements StudentDao {
 	public List<Student> list(int start, int count) {
 		List<Student> students = new ArrayList<>();
 
-		String sql = "SELECT * FROM student ORDER BY studentID desc limit ?,?";
+		String sql = "SELECT * FROM student ORDER BY stu_ID desc limit ?,?";
 
 		try (Connection c = DBUtil.getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
 			ps.setInt(1, start);
@@ -138,16 +142,18 @@ public class StudentDaoImpl implements StudentDao {
 			while (rs.next()) {
 				Student student = new Student();
 				int id = rs.getInt("id");
-				int studentID = rs.getInt("studentid");
+				int studentID = rs.getInt("stu_ID");
 				String name = rs.getString("name");
 				int age = rs.getInt("age");
 				String sex = rs.getString("sex");
-				Date birthday = rs.getDate("birthday");
+				int assid=rs.getInt("ass_ID");
+				Date birthday = rs.getDate("date");
 				student.setId(id);
 				student.setStudentID(studentID);
 				student.setName(name);
 				student.setAge(age);
 				student.setSex(sex);
+				student.setAssID(assid);
 				student.setBirthday(birthday);
 
 				students.add(student);
